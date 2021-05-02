@@ -15,6 +15,8 @@ class Integration:
         h = (b - a) / n
         x = np.arange(a, b + epsilon, h)
         y = []
+        if len(x) == 0:
+            return 0, ''
         result = 0
         table = ''
         try:
@@ -25,7 +27,7 @@ class Integration:
                 else:
                     y.append(value)
             table += Integration.__CreateTable__(x, y)
-            x = [(x[i] + x[i + 1]) / 2 for i in range(len(x)-1)]
+            x = [(x[i] + x[i + 1]) / 2 for i in range(len(x) - 1)]
             y = []
             for i in x:
                 value = redfunction.value(i)
@@ -35,7 +37,7 @@ class Integration:
                     y.append(value)
             result += sum(y)
             result *= h
-            table += Integration.__CreateTable__(x, y,'|x_t-1|'+' '*8+'|','|y_t-1|'+' '*8+'|')
+            table += Integration.__CreateTable__(x, y, '|x_t-1|' + ' ' * 8 + '|', '|y_t-1|' + ' ' * 8 + '|')
         except ValueError as exc:
             result_1, table_1 = Integration.RectangleMethod(redfunction, a, exc.args[0] - epsilon, epsilon, n)
             result_2, table_2 = Integration.RectangleMethod(redfunction, exc.args[0] + epsilon, b, epsilon, n)
@@ -61,7 +63,7 @@ class Integration:
                 else:
                     y.append(value)
             result = - y[0] + y[-1]
-            for i in range(0, n - 1):
+            for i in range(len(y) - 1):
                 result += 4 * y[i] if i % 2 == 1 else 2 * y[i]
             result = result * (h / 3)
             table = Integration.__CreateTable__(x, y)
@@ -101,18 +103,15 @@ class Integration:
 
     @staticmethod
     def SimpsonFault(R, redfunction, a, b):
-        n = (abs(redfunction.derivative(max([a, b]), 4)) * ((b - a) ** 5) / 180 / R) \
-            ** (1 / 4)
-        return n
+        return (abs(redfunction.derivative(max([a, b]), 4)) * ((b - a) ** 5) / 180 / R) \
+               ** (1 / 4)
 
     @staticmethod
     def TrapezeFault(R, redfunction, a, b):
-        n = (abs(redfunction.derivative(max([a, b]), 2)) * ((b - a) ** 3) / 12 / R) \
-            ** (1 / 2)
-        return n
+        return (abs(redfunction.derivative(max([a, b]), 2)) * ((b - a) ** 3) / 12 / R) \
+               ** (1 / 2)
 
     @staticmethod
     def RectangleFault(R, redfunction, a, b):
-        n = (abs(redfunction.derivative(max([a, b]), 2)) * ((b - a) ** 3) / 24 / R) \
-            ** (1 / 2)
-        return n
+        return (abs(redfunction.derivative(max([a, b]), 2)) * (b - a) ** 3) / 24 / R \
+               ** (1 / 2)
