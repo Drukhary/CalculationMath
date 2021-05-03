@@ -1,36 +1,36 @@
-from function import RedFunction, function_0,function_1
-from Integration import Integration as Intgr
-from graphic import DrawGraphic
-import numpy as np
-import sympy as sp
-import RedConsts as rc
-LEFT_BORDER = -3
-RIGHT_BORDER = 5
+import math
+from util.Function import RedFunction
+from util.Integration import Method
+from util.RedConsts import x
+
+LEFT_BORDER = 1
+RIGHT_BORDER = 2
 EPSILON = 0.01
 STEP = 0.1
 
+
+def RedRound(value, epsilon):
+    return round(value, -int(math.floor(math.log(epsilon, 10))))
+
+
 def process():
-    x=rc.x
-    redfunction = RedFunction(x**4/10+x**2/5-7,'x^4/10 + x^2/5 - 7')
-    # redfunction = RedFunction(x**2, '5/x')
-    print(Intgr.RectangleFault(EPSILON,redfunction,LEFT_BORDER,RIGHT_BORDER))
-    S,table=Intgr.RectangleMethod(redfunction, LEFT_BORDER, RIGHT_BORDER, EPSILON, 50)
-    print(S)
-    print(table)
-    print(Intgr.TrapezeFault(EPSILON,redfunction,LEFT_BORDER,RIGHT_BORDER))
-    S,table=Intgr.TrapezeMethod(redfunction, LEFT_BORDER, RIGHT_BORDER, EPSILON, 50)
-    print(S)
-    print(table)
-    print(Intgr.SimpsonFault(EPSILON,redfunction,LEFT_BORDER,RIGHT_BORDER))
-    S,table=Intgr.SimpsonMethod(redfunction, LEFT_BORDER, RIGHT_BORDER, EPSILON, 16)
-    print(S)
-    print(table)
-    x = np.arange(LEFT_BORDER, RIGHT_BORDER + EPSILON, STEP)
-    y = [float(redfunction.value(i)) for i in x]
-    print(y)
-    DrawGraphic(LEFT_BORDER, RIGHT_BORDER,
-                min(y), max(y),
-                x, y, redfunction.getDisplay())
+    red_function = RedFunction(x ** 4 / 10 + x ** 2 / 5 - 7, 'x^4/10 + x^2/5 - 7')
+    # red_function = RedFunction(5/x, '5/x')
+    integra = [Method.RECTANGLE, Method.SIMPSON, Method.TRAPEZE]
+    for method in integra:
+        n = int(math.floor(method.fault(EPSILON, red_function, LEFT_BORDER, RIGHT_BORDER)))
+        if n % 2 != 0:
+            n += 1
+        print(n)
+        S, table = method.NumericMethod(red_function, LEFT_BORDER, RIGHT_BORDER, EPSILON, n)
+        print('S = {0} ({1})'.format(RedRound(S, EPSILON), S))
+        print(table)
+    # x = np.arange(LEFT_BORDER, RIGHT_BORDER + EPSILON, STEP)
+    # y = [float(red_function.value(i)) for i in x]
+    # print(y)
+    # DrawGraphic(LEFT_BORDER, RIGHT_BORDER,
+    #             min(y), max(y),
+    #             x, y, red_function.getDisplay())
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 from sympy import *
-from RedConsts import x, INF
+from util.RedConsts import x
 
 
 class RedFunction:
@@ -16,19 +16,4 @@ class RedFunction:
         return diff(self.expr, x, power).subs({x: argument}).n()
 
     def getDisplay(self):
-        return self.display
-
-
-def function_0():
-    return x ** 3 - 7 * x ** 2 + 7 * x + 7 \
-        , "x^3 - 7x^2 + 7x + 7"
-
-
-def function_1():
-    return 5 / x \
-        , "5/x"
-
-
-def function_2():
-    return tan(x) \
-        , "5/x"
+        return 'f(x) = ' + self.display
