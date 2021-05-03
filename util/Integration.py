@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from sympy import zoo
 from util.RedConsts import INF
@@ -16,9 +18,8 @@ def calculate_function(x, function):
     return y
 
 
-def create_table(x, y, dx='|  x  |', dy='|  y  |'):
-    return '|     |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n' + \
-           dx \
+def create_table(x, y, title, dx='|  x  |', dy='|  y  |'):
+    return title + dx \
            + '|'.join(["{0:8.4f}".format(i) for i in x]) + '|\n' + \
            dy \
            + '|'.join(["{0:8.4f}".format(float(i)) for i in y]) + '|' + '\n'
@@ -29,17 +30,20 @@ def simpson_method(red_function, x, h):
     result = - y[0] + y[-1]
     for i in range(len(y) - 1):
         result += 4 * y[i] if i % 2 == 1 else 2 * y[i]
-    return result * (h / 3), create_table(x, y)
+    return result * (h / 3), create_table(x, y,
+                                          '|     |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n')
 
 
 def rectangle_method(red_function, x, h):
     table = ''
     y = calculate_function(x, red_function.value)
-    table += create_table(x, y)
+    table += create_table(x, y, '|     |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n')
     x = [(x[i] + x[i + 1]) / 2 for i in range(len(x) - 1)]
     y = calculate_function(x, red_function.value)
     result = sum(y) * h
-    table += create_table(x, y, '|x_t-1|' + ' ' * 8 + '|', '|y_t-1|' + ' ' * 8 + '|')
+    table += create_table(x, y,
+                          '|     |        |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n',
+                          '|x_t-1|        |', '|y_t-1|        |')
     return result, table
 
 
@@ -47,7 +51,7 @@ def trapeze_method(red_function, x, h):
     y = calculate_function(x, red_function.value)
     result = - (y[0] + y[-1]) / 2 + sum(y)
     result *= h
-    return result, create_table(x, y)
+    return result, create_table(x, y, '|     |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n')
 
 
 def simpson_fault(r, red_function, a, b):
@@ -97,15 +101,24 @@ class Method(enum.Enum):
     def approximate_calculation(self, red_function, a, b, eps=0.01, n=4):
         tables = []
         I_0, table = self.NumericMethod(red_function, a, b, eps, n)
+        table = '\nfor n = {}\nI = {}\n'.format(n, I_0) + table
         tables.append(table)
         n *= 2
         I_1, table = self.NumericMethod(red_function, a, b, eps, n)
+        table = 'for n = {}\n' \
+                'I = {} ({})\n' \
+                '|I_1 - I_0| = {} ({})\n' \
+                    .format(n, I_1, RedRound(I_1, eps), RedRound(abs(I_1 - I_0), eps), abs(I_1 - I_0)) + table
         tables.append(table)
         while abs(I_1 - I_0) > eps:
             n *= 2
-            I_0 = I_1
-            I_1, table = self.NumericMethod(red_function, a, b, eps, n)
+            I_0, (I_1, table) = I_1, self.NumericMethod(red_function, a, b, eps, n)
+            table = 'for n = {}\n' \
+                    'I = {} ({})\n' \
+                    '|I_1 - I_0| = {} ({})\n'\
+                        .format(n, I_1,RedRound(I_1,eps),RedRound(abs(I_1 - I_0),eps), abs(I_1 - I_0)) + table
             tables.append(table)
-        return I_1, '\n'.join(tables)
+        return I_1, '\n'.join(tables),n
 
-
+def RedRound(value, epsilon):
+    return round(value, -int(math.floor(math.log(epsilon, 10))))
