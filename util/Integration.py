@@ -17,7 +17,8 @@ def calculate_function(x, function):
 
 
 def create_table(x, y, dx='|  x  |', dy='|  y  |'):
-    return dx \
+    return '|     |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n' + \
+           dx \
            + '|'.join(["{0:8.4f}".format(i) for i in x]) + '|\n' + \
            dy \
            + '|'.join(["{0:8.4f}".format(float(i)) for i in y]) + '|' + '\n'
@@ -67,7 +68,7 @@ def rectangle_fault(r, red_function, a, b):
 class Method(enum.Enum):
     SIMPSON = (simpson_method, simpson_fault, "Simpson method")
     RECTANGLE = (rectangle_method, rectangle_fault, "Rectangle method")
-    TRAPEZE = (trapeze_method, trapeze_fault,"Trapeze method")
+    TRAPEZE = (trapeze_method, trapeze_fault, "Trapeze method")
 
     def __init__(self, type, fault, title):
         self.type = type
@@ -85,12 +86,26 @@ class Method(enum.Enum):
             result, table = self.type(red_function, x, h)
         except ValueError as exc:
             result_1, table_1 = self.NumericMethod(red_function,
-                                              a, exc.args[0] - epsilon, epsilon, n)
+                                                   a, exc.args[0] - epsilon, epsilon, n)
             result_2, table_2 = self.NumericMethod(red_function,
-                                              exc.args[0] + epsilon, b, epsilon, n)
+                                                   exc.args[0] + epsilon, b, epsilon, n)
             result = result_1 + result_2
             table = table_1 + table_2
         finally:
             return result, table
+
+    def approximate_calculation(self, red_function, a, b, eps=0.01, n=4):
+        tables = []
+        I_0, table = self.NumericMethod(red_function, a, b, eps, n)
+        tables.append(table)
+        n *= 2
+        I_1, table = self.NumericMethod(red_function, a, b, eps, n)
+        tables.append(table)
+        while abs(I_1 - I_0) > eps:
+            n *= 2
+            I_0 = I_1
+            I_1, table = self.NumericMethod(red_function, a, b, eps, n)
+            tables.append(table)
+        return I_1, '\n'.join(tables)
 
 

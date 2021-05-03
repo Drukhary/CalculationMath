@@ -15,5 +15,8 @@ class RedFunction:
     def derivative(self, argument, power=1):
         return diff(self.expr, x, power).subs({x: argument}).n()
 
+    def integrate(self,left,right):
+        return integrate(self.expr,(x,left,right)).n()
+
     def getDisplay(self):
         return 'f(x) = ' + self.display
