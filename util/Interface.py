@@ -11,12 +11,27 @@ Functions = [
 ]
 
 
+def set_eps():
+    print('Enter the epsilon')
+    user_str = input()
+    if user_str == 'exit' or user_str == '':
+        return None
+    while True:
+        try:
+            epsilon = float(user_str)
+            break
+        except:
+            print('Enter the correct digit')
+            user_str = input()
+
+
 def process():
     left = 1.
     right = 2.
     epsilon = 0.01
     red_function = Functions[0]
     red_method = Method.SIMPSON
+
     while True:
         print('Enter a command')
         user_str = input()
@@ -80,7 +95,20 @@ def process():
                       .format(Method.RECTANGLE.title, Method.TRAPEZE.title, Method.SIMPSON.title))
                 user_str = input()
                 if user_str == 'rect':
-                    red_method = Method.RECTANGLE
+                    while True:
+                        print('Enter rectangle method mode:\n"left","right" or "center"')
+                        user_str = input()
+                        if user_str == 'left':
+                            red_method = Method.RECTANGLE_LEFT
+                            break
+                        elif user_str == 'right':
+                            red_method = Method.RECTANGLE_RIGHT
+                            break
+                        elif user_str == 'center':
+                            red_method = Method.RECTANGLE_CENTER
+                            break
+                        else:
+                            print('Invalid input')
                     break
                 elif user_str == 'trap':
                     red_method = Method.TRAPEZE
@@ -96,11 +124,21 @@ def process():
                   'left border(a) = {}\n'
                   'right border(b) = {}\n'
                   'epsilon = {}\n'
-                  .format(red_function.getDisplay(),red_method.title, left, right, epsilon))
-        elif user_str == 'calc' or user_str == 'calculation':
-            n = int(math.ceil(abs(red_method.fault(epsilon, red_function, left, right))))
-            if n % 2 != 0:
-                n += 1
+                  .format(red_function.getDisplay(), red_method.title, left, right, epsilon))
+        elif user_str == 'ncalc' or user_str == 'calc':
+            if user_str == 'ncalc':
+                while True:
+                    print("Enter n")
+                    try:
+                        n = int(input())
+                        if n < 2:
+                            raise Exception
+                        break
+                    except:
+                        print("Invalid input")
+            else:
+                print('n = {}'.format(red_method.fault(epsilon, red_function, left, right)))
+                n = int(math.ceil(red_method.fault(epsilon, red_function, left, right)))
             I, table = red_method.NumericMethod(red_function, left, right, epsilon, n)
             truth_I = red_function.integrate(left, right)
             print('{}\n'
@@ -126,7 +164,7 @@ def process():
                 'end n = {}\n'
                 'result I = {} ({})\n'
                 'epsilon = {}\n'
-                '|R| = |I-Iтр| = {:8.4f} ({})\n'
+                '|R| = |I-Iтр| = {} ({})\n'
                 '{}'.format(
                     red_method.title,
                     n_begin, n_end,
@@ -145,6 +183,7 @@ def process():
                   'Enter "choose function" to choose function\n'
                   'Enter "choose method" to choose method\n'
                   'Enter "calc" to begin calculation\n'
+                  'Enter "ncalc" to begin calculation with assigned n\n'
                   'Enter "now" to begin calculation\n'
                   'Enter "exit" to exit (Suddenly, isn\'t it?)\n'
                   )

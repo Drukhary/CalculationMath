@@ -34,17 +34,39 @@ def simpson_method(red_function, x, h):
                                           '|     |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n')
 
 
-def rectangle_method(red_function, x, h):
-    table = ''
-    y = calculate_function(x, red_function.value)
-    table += create_table(x, y, '|     |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n')
-    x = [(x[i] + x[i + 1]) / 2 for i in range(len(x) - 1)]
-    y = calculate_function(x, red_function.value)
-    result = sum(y) * h
-    table += create_table(x, y,
-                          '|     |        |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n',
-                          '|x_t-1|        |', '|y_t-1|        |')
-    return result, table
+def left(x):
+    return [x[i] for i in range(len(x) - 1)]
+
+
+def right(x):
+    return [x[i+1] for i in range(len(x) - 1)]
+
+
+def center(x):
+    return [(x[i] + x[i + 1]) / 2 for i in range(len(x) - 1)]
+
+
+class Mode(enum.Enum):
+    LEFT = left
+    RIGHT = right
+    CENTER = center
+
+    def __init__(self, mode):
+        self.type = mode
+
+def rectangle_methods(mode):
+    def rectangle_method(red_function, x, h):
+        table = ''
+        y = calculate_function(x, red_function.value)
+        table += create_table(x, y, '|     |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n')
+        x = mode(x)
+        y = calculate_function(x, red_function.value)
+        result = sum(y) * h
+        table += create_table(x, y,
+                              '|     |        |' + '|'.join(["{0:8}".format(i + 1) for i in range(len(x))]) + '|\n',
+                              '|x_t-1|        |', '|y_t-1|        |')
+        return result, table
+    return rectangle_method
 
 
 def trapeze_method(red_function, x, h):
@@ -71,13 +93,17 @@ def rectangle_fault(r, red_function, a, b):
 
 class Method(enum.Enum):
     SIMPSON = (simpson_method, simpson_fault, "Simpson method")
-    RECTANGLE = (rectangle_method, rectangle_fault, "Rectangle method")
+    RECTANGLE = (rectangle_methods(Mode.CENTER), rectangle_fault, "Rectangle method")
+    RECTANGLE_LEFT = (rectangle_methods(Mode.LEFT), rectangle_fault, "Rectangle method")
+    RECTANGLE_RIGHT = (rectangle_methods(Mode.RIGHT), rectangle_fault, "Rectangle method")
+    RECTANGLE_CENTER = (rectangle_methods(Mode.CENTER), rectangle_fault, "Rectangle method")
     TRAPEZE = (trapeze_method, trapeze_fault, "Trapeze method")
 
-    def __init__(self, type, fault, title):
+    def __init__(self, type, fault, title,desc=''):
         self.type = type
         self.fault = fault
         self.title = title
+        self.desc = desc
 
     def NumericMethod(self, red_function, a, b, epsilon=0.01, n=4):
         h = (b - a) / n
@@ -115,10 +141,11 @@ class Method(enum.Enum):
             I_0, (I_1, table) = I_1, self.NumericMethod(red_function, a, b, eps, n)
             table = 'for n = {}\n' \
                     'I = {} ({})\n' \
-                    '|I_1 - I_0| = {} ({})\n'\
-                        .format(n, I_1,RedRound(I_1,eps),RedRound(abs(I_1 - I_0),eps), abs(I_1 - I_0)) + table
+                    '|I_1 - I_0| = {} ({})\n' \
+                        .format(n, I_1, RedRound(I_1, eps), RedRound(abs(I_1 - I_0), eps), abs(I_1 - I_0)) + table
             tables.append(table)
-        return I_1, '\n'.join(tables),n
+        return I_1, '\n'.join(tables), n
+
 
 def RedRound(value, epsilon):
     return round(value, -int(math.floor(math.log(epsilon, 10))))
