@@ -1,8 +1,5 @@
-import math
-import sympy as sp
-from util.Function import RedFunction
-from util.Integration import Method
-from util.RedConsts import x
+from matplotlib import pyplot as plt
+
 from util.Interface import process
 
 
@@ -13,3 +10,4 @@ STEP = 0.1
 
 if __name__ == '__main__':
     process()
+
