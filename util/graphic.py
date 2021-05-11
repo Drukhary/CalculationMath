@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from util.RedConsts import condition
 
 
 def draw_graphic(x_min, x_max, y_min, y_max, x,y, description):

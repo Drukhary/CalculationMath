@@ -1,29 +1,25 @@
-import math
 import numpy
-from sympy import core, pi
 
 from util.Function import RedFunction
-from util.RedConsts import x, sin, tan, condition
+from util.RedConsts import x, condition
 from util.Integration import Method, RedRound
 from util.graphic import draw_graphic
 
 Functions = [
     RedFunction(x ** 4 / 10 + x ** 2 / 5 - 7, 'x^4/10 + x^2/5 - 7'),
-    RedFunction(x ** 2, 'x^2'),
+    RedFunction(3 * x ** 3 - 4 * x ** 2 + 7 * x - 17, '3x^3 - 4x^2 + 7x - 17'),
     RedFunction(1 / x, '1 / x'),
-    RedFunction(tan(x), 'tg(x)'),
     RedFunction((2 ** 2 - x ** 2) / (x ** 2 - 2 ** 2), '(4 - x^2) / (x^2 - 4)'),
-    RedFunction(2 * x + 4, '2x + 4')
+    RedFunction(x ** 2 - 2 * x + 1, 'x^2 - 2x - 1')
 ]
-
 
 def process():
     step = 0.001
-    left = -5
-    right = 5
+    left = 1
+    right = 2
     epsilon = 0.01
-    red_function = Functions[4]
-    red_method = Method.TRAPEZE
+    red_function = Functions[1]
+    red_method = Method.SIMPSON
 
     while True:
         print('Enter a command')
@@ -113,11 +109,11 @@ def process():
                     break
         elif user_str == 'now' or user_str == 'n':
             print('The function: {}\n'
-                  'The method: {}\n'
+                  'The method: {} ({})\n'
                   'left border(a) = {}\n'
                   'right border(b) = {}\n'
                   'epsilon = {}\n'
-                  .format(red_function.getDisplay(), red_method.title, left, right, epsilon))
+                  .format(red_function.getDisplay(), red_method.title,red_method.desc, left, right, epsilon))
         elif user_str == 'ncalc' or user_str == 'calc':
             if user_str == 'ncalc':
                 while True:
@@ -131,32 +127,32 @@ def process():
                         print("Invalid input")
                 I, table = red_method.num_method(red_function, left, right, epsilon, n)
                 truth_I = red_function.integrate(left, right)
-                print('{}\n'
+                print('{} ({})\n'
                       'n = {}\n'
                       'I = {} ({})\n'
                       '|R| = |I-Iтр| = {} ({})\n'
                       '\n{}'.format(
-                    red_method.title,
+                    red_method.title, red_method.desc,
                     n,
                     RedRound(I, epsilon),
                     I,
-                    RedRound(abs(truth_I - I), epsilon * 0.1),
+                    RedRound(abs(truth_I - I), epsilon / 100),
                     abs(truth_I - I),
                     table
                 ))
             else:
                 n, I, table = red_method.n_num_method(red_function, left, right, epsilon)
                 truth_I = red_function.integrate(left, right)
-                print('{}\n'
+                print('{} ({})\n'
                       'n = {}\n'
                       'I = {} ({})\n'
                       '|R| = |I-Iтр| = {} ({})\n'
                       '\n{}'.format(
-                    red_method.title,
+                    red_method.title, red_method.desc,
                     n,
                     RedRound(I, epsilon),
                     I,
-                    RedRound(abs(truth_I - I), epsilon * 0.1),
+                    RedRound(abs(truth_I - I), epsilon/100),
                     abs(truth_I - I),
                     table
                 ))
@@ -172,19 +168,19 @@ def process():
             I, table, n_end = red_method.approximate_calculation(red_function, left, right, epsilon, n_begin)
             truth_I = red_function.integrate(left, right)
             print(
-                '{}\n'
+                '{} ({})\n'
                 'begin n = {}\n'
                 'end n = {}\n'
                 'result I = {} ({})\n'
                 'epsilon = {}\n'
-                '|R| = |I-Iтр| = {} ({})\n'
+                '|R| = |I-Iтр| = {}  ({})\n'
                 '{}'.format(
-                    red_method.title,
+                    red_method.title, red_method.desc,
                     n_begin, n_end,
                     RedRound(I, epsilon),
                     I,
                     epsilon,
-                    RedRound(abs(truth_I - I), epsilon * 0.1),
+                    RedRound(abs(truth_I - I), epsilon/100),
                     abs(truth_I - I),
                     table
                 ))
